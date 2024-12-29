@@ -14,8 +14,8 @@ labs.lesiw.io/ops v0.0.0-20241225025618-0c8ebe205d8d h1:4SDyitrvoWmFKS6hGNZW7K9Y
 labs.lesiw.io/ops v0.0.0-20241225025618-0c8ebe205d8d/go.mod h1:Df/3NUzp0iS9TjL5mvuacI+q2pXWEuyuHjFtfg+Picg=
 lesiw.io/clerk v0.2.0 h1:Rcq19dHx9TRk4Rkpm9Sw/KGySUxrNmPhrcmU2EQhBYo=
 lesiw.io/clerk v0.2.0/go.mod h1:WMyvgTe+3Eob36b6KX86MOaxaeNMvv/HZTSsf2Dedhg=
-lesiw.io/cmdio v0.8.0 h1:5Psx1eHK1osIuII62dWr5WoBqeTrlb2R9SuVY9Rpk0Y=
-lesiw.io/cmdio v0.8.0/go.mod h1:kYVnG1zsDgkrjBmlECbWf34Q83J8YeiQxyE2QOT3tBQ=
+lesiw.io/cmdio v0.9.0 h1:m4soyeXn9Xuelt6UHr4+piFLheb/L4lveJJ8p6PguGE=
+lesiw.io/cmdio v0.9.0/go.mod h1:RRxYqFsLgx3JpElt244AGmRdeFGnc/6fbh3fFgcNvnk=
 lesiw.io/cmdio/x/busybox v0.1.0 h1:e1G1JJttIcwpGuUki7oLQTx7Ve6BWExe2Cs4aw0kExM=
 lesiw.io/cmdio/x/busybox v0.1.0/go.mod h1:PkwZVzE2tTrNI4BNOgiz595SwwF8BAbvI9LSz1P5GJY=
 lesiw.io/defers v0.9.0 h1:Sg7RYbhxfHhXMHclO65MJ4oRbyhfSBSeHQw4YjLr6n0=
