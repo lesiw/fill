@@ -76,7 +76,11 @@ func randMap(val reflect.Value, rng *rand.Rand) {
 		return
 	}
 	sz-- // Allow zero size.
-	val.Set(reflect.MakeMapWithSize(val.Type(), sz))
+	if val.IsZero() {
+		val.Set(reflect.MakeMapWithSize(val.Type(), sz))
+	} else {
+		val.Clear()
+	}
 	for range sz {
 		k := reflect.New(val.Type().Key()).Elem()
 		randValue(k, rng)
@@ -90,7 +94,9 @@ func randPointer(val reflect.Value, rng *rand.Rand) {
 	if rng.IntN(maxSize) == 0 {
 		val.SetZero() // nil
 	} else {
-		val.Set(reflect.New(val.Type().Elem()))
+		if val.IsZero() {
+			val.Set(reflect.New(val.Type().Elem()))
+		}
 		randValue(val.Elem(), rng)
 	}
 }
