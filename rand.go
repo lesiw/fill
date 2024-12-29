@@ -65,7 +65,7 @@ func randChan(val reflect.Value, rng *rand.Rand) {
 	if sz := rng.IntN(maxSize); sz == 0 {
 		val.SetZero() // nil
 	} else {
-		reflect.MakeChan(val.Type(), sz-1)
+		val.Set(reflect.MakeChan(val.Type(), sz-1))
 	}
 }
 
