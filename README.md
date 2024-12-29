@@ -19,7 +19,7 @@ import (
 
 func FuzzTlsConfigClone(f *testing.F) {
     opts := cmp.Options{cmpopts.IgnoreUnexported(tls.Config{})}
-    f.Fuzz(func(t *testing.T, seed1 uint64, seed2 uint64) {
+    f.Fuzz(func(t *testing.T, seed1, seed2 uint64) {
         cfg1 := &tls.Config{}
         fill.Do(&cfg1, rand.New(rand.NewPCG(seed1, seed2)))
         cfg2 := cfg1.Clone()
@@ -30,6 +30,6 @@ func FuzzTlsConfigClone(f *testing.F) {
 }
 ```
 
-[▶️ Run this example on the Go Playground](https://go.dev/play/p/_HX3J0f__AF)
+[▶️ Run this example on the Go Playground](https://go.dev/play/p/65HAJsK2Fir)
 
 To run locally, `go test -fuzz=Fuzz -fuzztime=10s`.
