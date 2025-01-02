@@ -17,7 +17,7 @@ func (f *Filler) Fill(a any) {
 	if val.Kind() != reflect.Pointer {
 		panic("bad parameter: value to fill must be pointer")
 	}
-	f.fillValue(val)
+	f.fillValue(val.Elem())
 }
 
 func (f *Filler) fillValue(val reflect.Value) {

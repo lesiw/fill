@@ -19,11 +19,11 @@ import (
     "lesiw.io/fill"
 )
 
-func TestTlsConfigClone(f *testing.F) {
+func TestTlsConfigClone(t *testing.T) {
     opts := cmp.Options{cmpopts.IgnoreUnexported(tls.Config{})}
     for range 100 {
-        var cfg tls.Config
-        fill.Rand(&cfg)
+        cfg := new(tls.Config)
+        fill.Rand(cfg)
         if want, got := cfg, cfg.Clone(); !cmp.Equal(want, got, opts) {
             t.Errorf("-original +cloned\n%s", cmp.Diff(want, got, opts))
         }
@@ -31,4 +31,4 @@ func TestTlsConfigClone(f *testing.F) {
 }
 ```
 
-[▶️ Run this example on the Go Playground](https://go.dev/play/p/PJCBSOH2VaO)
+[▶️ Run this example on the Go Playground](https://go.dev/play/p/x4nNbRdHyZb)
