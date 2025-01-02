@@ -25,10 +25,10 @@ func TestTlsConfigClone(t *testing.T) {
         cfg := new(tls.Config)
         fill.Rand(cfg)
         if want, got := cfg, cfg.Clone(); !cmp.Equal(want, got, opts) {
-            t.Errorf("-original +cloned\n%s", cmp.Diff(want, got, opts))
+            t.Fatalf("-original +cloned\n%s", cmp.Diff(want, got, opts))
         }
     }
 }
 ```
 
-[▶️ Run this example on the Go Playground](https://go.dev/play/p/x4nNbRdHyZb)
+[▶️ Run this example on the Go Playground](https://go.dev/play/p/87V0mJqv5qu)
