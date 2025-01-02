@@ -19,19 +19,16 @@ import (
     "lesiw.io/fill"
 )
 
-func FuzzTlsConfigClone(f *testing.F) {
+func TestTlsConfigClone(f *testing.F) {
     opts := cmp.Options{cmpopts.IgnoreUnexported(tls.Config{})}
-    f.Fuzz(func(t *testing.T, seed1, seed2 uint64) {
-        cfg1 := &tls.Config{}
-        fill.Rand(&cfg1, rand.New(rand.NewPCG(seed1, seed2)))
-        cfg2 := cfg1.Clone()
-        if !cmp.Equal(cfg1, cfg2, opts) {
-            t.Errorf("-original +cloned\n%s", cmp.Diff(cfg1, cfg2, opts))
+    for range 100 {
+        var cfg tls.Config
+        fill.Rand(&cfg)
+        if want, got := cfg, cfg.Clone(); !cmp.Equal(want, got, opts) {
+            t.Errorf("-original +cloned\n%s", cmp.Diff(want, got, opts))
         }
-    })
+    }
 }
 ```
 
-[▶️ Run this example on the Go Playground](https://go.dev/play/p/TTx2CT85Ro3)
-
-To run locally, `go test -fuzz=Fuzz -fuzztime=10s`.
+[▶️ Run this example on the Go Playground](https://go.dev/play/p/PJCBSOH2VaO)

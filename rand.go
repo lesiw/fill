@@ -2,80 +2,80 @@ package fill
 
 import (
 	"fmt"
-	"math/rand/v2"
 	"reflect"
+	"strings"
+	// math/rand/v2 should not be imported in this file.
 )
 
-// maxSize is an arbitrary upper bound on value length.
-const maxSize = 16
+var randFiller = Filler{MaxSize: 8, Runes: Base64}
 
 // Rand fills a value with random data.
-func Rand(a any, rng *rand.Rand) {
-	if rng == nil {
-		panic("bad parameter: nil rand.Rand")
-	}
+func Rand(a any) { randFiller.Fill(a) }
+
+func (f *Filler) Fill(a any) {
 	val := reflect.ValueOf(a)
 	if val.Kind() != reflect.Pointer {
 		panic("bad parameter: value to fill must be pointer")
 	}
-	randValue(val.Elem(), rng)
+	f.fillValue(val)
 }
 
-func randValue(val reflect.Value, rng *rand.Rand) {
+func (f *Filler) fillValue(val reflect.Value) {
 	k := val.Kind()
 	switch {
 	case k == reflect.Bool:
-		val.SetBool(rng.IntN(2) == 0)
+		val.SetBool(f.intN(2) == 0)
 	case intKind(k):
-		val.SetInt(rng.Int64())
+		val.SetInt(f.int64())
 	case uintKind(k):
-		val.SetUint(rng.Uint64())
+		val.SetUint(f.uint64())
 	case floatKind(k):
-		val.SetFloat(rng.Float64())
+		val.SetFloat(f.float64())
 	case complexKind(k):
-		val.SetComplex(complex(rng.Float64(), rng.Float64()))
+		val.SetComplex(complex(f.float64(), f.float64()))
 	case k == reflect.Array:
-		randArray(val, rng)
+		f.fillArray(val)
 	case k == reflect.Chan:
-		randChan(val, rng)
+		f.fillChan(val)
 	case k == reflect.Func || k == reflect.Interface:
 		// Can't fill.
 	case k == reflect.Map:
-		randMap(val, rng)
+		f.fillMap(val)
 	case k == reflect.Pointer:
-		randPointer(val, rng)
+		f.fillPointer(val)
 	case k == reflect.Slice:
-		randSlice(val, rng)
+		f.fillSlice(val)
 	case k == reflect.String:
-		randString(val, rng)
+		f.fillString(val)
 	case k == reflect.Struct:
-		randStruct(val, rng)
+		f.fillStruct(val)
 	default:
 		panic(fmt.Sprintf("unhandled type: %s", val.Kind()))
 	}
 }
 
-func randArray(val reflect.Value, rng *rand.Rand) {
+func (f *Filler) fillArray(val reflect.Value) {
 	for i := range val.Len() {
-		randValue(val.Index(i), rng)
+		f.fillValue(val.Index(i))
 	}
 }
 
-func randChan(val reflect.Value, rng *rand.Rand) {
-	if sz := rng.IntN(maxSize); sz == 0 {
+func (f *Filler) fillChan(val reflect.Value) {
+	if sz := f.intN(f.MaxSize - f.MinSize); sz == 0 && !f.NeverNil {
 		val.SetZero() // nil
 	} else {
-		val.Set(reflect.MakeChan(val.Type(), sz-1))
+		val.Set(reflect.MakeChan(val.Type(),
+			f.MinSize+f.intN(f.MaxSize-f.MinSize)))
 	}
 }
 
-func randMap(val reflect.Value, rng *rand.Rand) {
-	sz := rng.IntN(maxSize)
-	if sz == 0 {
+func (f *Filler) fillMap(val reflect.Value) {
+	sz := f.intN(f.MaxSize - f.MinSize)
+	if !f.NeverNil && sz == 0 {
 		val.SetZero() // nil
 		return
 	}
-	sz-- // Allow zero size.
+	sz = f.MinSize + f.intN(f.MaxSize-f.MinSize)
 	if val.IsZero() {
 		val.Set(reflect.MakeMapWithSize(val.Type(), sz))
 	} else {
@@ -83,53 +83,59 @@ func randMap(val reflect.Value, rng *rand.Rand) {
 	}
 	for range sz {
 		k := reflect.New(val.Type().Key()).Elem()
-		randValue(k, rng)
+		f.fillValue(k)
 		v := reflect.New(val.Type().Elem()).Elem()
-		randValue(v, rng)
+		f.fillValue(v)
 		val.SetMapIndex(k, v)
 	}
 }
 
-func randPointer(val reflect.Value, rng *rand.Rand) {
-	if rng.IntN(maxSize) == 0 {
+func (f *Filler) fillPointer(val reflect.Value) {
+	if !f.NeverNil && f.intN(f.MaxSize-f.MinSize) == 0 {
 		val.SetZero() // nil
 	} else {
 		if val.IsZero() {
 			val.Set(reflect.New(val.Type().Elem()))
 		}
-		randValue(val.Elem(), rng)
+		f.fillValue(val.Elem())
 	}
 }
 
-func randSlice(val reflect.Value, rng *rand.Rand) {
-	sz := rng.IntN(maxSize)
-	if sz == 0 {
+func (f *Filler) fillSlice(val reflect.Value) {
+	sz := f.intN(f.MaxSize - f.MinSize)
+	if !f.NeverNil && sz == 0 {
 		val.SetZero() // nil
 		return
 	}
-	sz-- // Allow zero size.
+	sz = f.MinSize + f.intN(f.MaxSize-f.MinSize)
 	for range sz {
 		e := reflect.New(val.Type().Elem()).Elem()
-		randValue(e, rng)
+		f.fillValue(e)
 		val.Set(reflect.Append(val, e))
 	}
 }
 
-func randString(val reflect.Value, rng *rand.Rand) {
-	sz := rng.IntN(maxSize)
-	b := make([]byte, sz)
-	for i := range sz {
-		b[i] = byte(rng.IntN(256))
+func (f *Filler) fillString(val reflect.Value) {
+	sz := f.MinSize + f.intN(f.MaxSize-f.MinSize)
+	var b strings.Builder
+	if f.Runes == nil {
+		for range sz {
+			b.WriteByte(byte(f.intN(256)))
+		}
+	} else {
+		for range sz {
+			b.WriteRune(f.Runes[f.intN(len(f.Runes))])
+		}
 	}
-	val.SetString(string(b))
+	val.SetString(b.String())
 }
 
-func randStruct(val reflect.Value, rng *rand.Rand) {
+func (f *Filler) fillStruct(val reflect.Value) {
 	for i := range val.NumField() {
-		f := val.Field(i)
-		if !f.CanSet() {
+		field := val.Field(i)
+		if !field.CanSet() {
 			continue
 		}
-		randValue(f, rng)
+		f.fillValue(field)
 	}
 }
