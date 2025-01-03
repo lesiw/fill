@@ -11,7 +11,6 @@ package main
 
 import (
     "crypto/tls"
-    "math/rand/v2"
     "testing"
 
     "github.com/google/go-cmp/cmp"
